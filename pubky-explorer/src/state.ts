@@ -3,10 +3,17 @@ import { createStore } from 'solid-js/store';
 
 export const client = PubkyClient.testnet();
 
-export const [store, setStore] = createStore<{ explorer: Boolean, dir: string, loading: Boolean, list: Array<{ link: string, name: string }> }>({
+export const [store, setStore] = createStore<{
+  explorer: Boolean,
+  dir: string,
+  loading: boolean,
+  shallow: boolean,
+  list: Array<{ link: string, name: string, isDirectory: boolean }>
+}>({
   explorer: false,
   dir: "",
   loading: false,
+  shallow: true,
   list: []
 })
 
@@ -18,28 +25,59 @@ export function resetStore() {
 }
 
 export function loadList() {
+  setStore('list', [])
+  loadMore()
+}
+
+export function switchShallow() {
+  setStore('shallow', !store.shallow)
+  if (store.dir.length > 0) {
+    loadList()
+  }
+}
+
+export function loadMore() {
+  // @ts-ignore
+  const cursor = (store.list.length > 0 && store.list[store.list.length - 1])['link']
+
   let path = store.dir
 
   setStore('loading', true)
 
-  client.list(`pubky://${path}`, "", false, 10).then((l: Array<string>) => {
+  // ITEMS IN VIEW
+  let limit = Math.ceil(window.innerHeight / 40);
+
+  client.list(`pubky://${path}`, cursor || "", false, limit, store.shallow).then((l: Array<string>) => {
     const list = l.map(link => {
+      let name = link.replace('pubky://', '').replace(store.dir, '');
+      let isDirectory = name.endsWith('/');
+
       return {
         link,
-        name: link.replace('pubky://', '').replace(store.dir, '')
+        isDirectory,
+        name
       }
     })
 
     setStore('loading', false)
 
+    let map = new Map();
+
+    for (let item of store.list) {
+      map.set(item.name, item)
+    }
+    for (let item of list) {
+      map.set(item.name, item)
+    }
+
     // @ts-ignore
-    setStore('list', list)
+    setStore('list', Array.from(map.values()))
     setStore('dir', path)
   });
 }
 
 export function updateDir(path: string) {
-  path = path.replace('pubky://', '')
+  path = path?.split('://')[1] || path
 
   let parts = path.split("/").filter(Boolean);
 
