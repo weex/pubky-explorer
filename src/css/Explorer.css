@@ -1,0 +1,53 @@
+.explorer {
+  text-align: left;
+}
+
+.path {
+  display:flex;
+  flex-wrap: wrap;
+}
+
+.path button {
+  padding: .5rem
+}
+
+ul {
+  padding-left: 1rem;
+
+  display: flex;
+  flex-direction: column; 
+  row-gap: .5rem;
+
+  width: fit-content;
+  max-width: calc(100% - 1rem);
+}
+
+li {
+  width: 100%;
+}
+
+li button {
+  position: relative;
+
+  width: 100%;
+
+  padding: .5rem;
+  padding-left: 2rem;
+
+  text-align: left;
+  white-space: normal;
+  overflow: hidden;
+}
+
+li button .icon {
+  font-size: .8em;
+  padding-right: .8em; 
+
+  position: absolute;
+  left: .5rem;
+}
+
+li button span {
+  word-wrap: break-word; 
+  overflow-wrap: break-word; 
+}
